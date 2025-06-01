@@ -1,5 +1,5 @@
-import Modal from "@/components/Modal";
-import { Priority, Status, useCreateTaskMutation } from "@/state/api";
+import Modal from "@/app/components/Modal";
+import { Priority, Status, useCreateTaskMutation } from "@/app/state/api";
 import React, { useState } from "react";
 import { formatISO } from "date-fns";
 
@@ -23,7 +23,7 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
   const [projectId, setProjectId] = useState("");
 
   const handleSubmit = async () => {
-    if (!title || !authorUserId || !(id !== null || projectId)) return;
+    if (!isFormValid()) return;
 
     const formattedStartDate = formatISO(new Date(startDate), {
       representation: "complete",
@@ -44,10 +44,16 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
       assignedUserId: parseInt(assignedUserId),
       projectId: id !== null ? Number(id) : Number(projectId),
     });
+
+    onClose();
   };
 
   const isFormValid = () => {
-    return title && authorUserId && !(id !== null || projectId);
+    return (
+      title.trim() !== "" &&
+      !isNaN(Number(authorUserId)) &&
+      (id !== null || !isNaN(Number(projectId)))
+    );
   };
 
   const selectStyles =
@@ -82,9 +88,7 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
           <select
             className={selectStyles}
             value={status}
-            onChange={(e) =>
-              setStatus(Status[e.target.value as keyof typeof Status])
-            }
+            onChange={(e) => setStatus(e.target.value as Status)}
           >
             <option value="">Select Status</option>
             <option value={Status.ToDo}>To Do</option>
@@ -92,12 +96,11 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
             <option value={Status.UnderReview}>Under Review</option>
             <option value={Status.Completed}>Completed</option>
           </select>
+
           <select
             className={selectStyles}
             value={priority}
-            onChange={(e) =>
-              setPriority(Priority[e.target.value as keyof typeof Priority])
-            }
+            onChange={(e) => setPriority(e.target.value as Priority)}
           >
             <option value="">Select Priority</option>
             <option value={Priority.Urgent}>Urgent</option>
@@ -107,6 +110,7 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
             <option value={Priority.Backlog}>Backlog</option>
           </select>
         </div>
+
         <input
           type="text"
           className={inputStyles}
@@ -129,6 +133,7 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
+
         <input
           type="text"
           className={inputStyles}
@@ -147,7 +152,7 @@ const ModalNewTask = ({ isOpen, onClose, id = null }: Props) => {
           <input
             type="text"
             className={inputStyles}
-            placeholder="ProjectId"
+            placeholder="Project ID"
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
           />
